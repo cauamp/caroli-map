@@ -196,21 +196,47 @@ def clickable_card(children, href, bg, color="#2b2b2b", grow=1):
     )
 
 
+# Visual único para todos os botões/links (mesma linguagem do design)
+PILL_STYLE = {
+    "backgroundColor": HEADER_YELLOW,
+    "color": "#2b2b2b",
+    "fontFamily": "'Dreaming Outloud Sans', 'Comic Sans MS', cursive",
+    "fontWeight": "bold",
+    "padding": "14px 20px",
+    "borderRadius": "14px",
+    "textDecoration": "none",
+    "textAlign": "center",
+    "boxSizing": "border-box",
+    "boxShadow": "0 2px 6px rgba(0,0,0,0.12)",
+}
+
+
 def download_button():
     return html.A(
         ["BAIXE O TRABALHO ESCRITO AQUI ⬇"],
         href="#",
-        style={
-            "backgroundColor": HEADER_YELLOW,
-            "color": "#2b2b2b",
-            "fontFamily": "'Dreaming Outloud Sans', 'Comic Sans MS', cursive",
-            "fontWeight": "bold",
-            "padding": "16px 20px",
-            "borderRadius": "14px",
-            "textDecoration": "none",
-            "display": "block",
-            "textAlign": "center",
-        },
+        className="pill",
+        style={**PILL_STYLE, "display": "block"},
+    )
+
+
+def home_button():
+    """Botão de navegação de volta à página inicial (páginas internas)."""
+    return dcc.Link(
+        ["⬅ VOLTAR AO INÍCIO"],
+        href="/",
+        className="pill",
+        style={**PILL_STYLE, "display": "block"},
+    )
+
+
+def cta_pill(text):
+    """Chamada visível de 'link' dentro de um card clicável. É um <span>
+    (não uma âncora) porque o card inteiro já é um dcc.Link."""
+    return html.Span(
+        [text, " ➜"],
+        className="pill",
+        style={**PILL_STYLE, "display": "inline-block", "marginTop": "16px"},
     )
 
 
@@ -285,7 +311,8 @@ def page_home():
             "grupo de pesquisa Estudos em Cultura, Educação e Infância (ElaCei) para a "
             "pesquisa: Espaços de Fomento de Desenvolvimento Infantil no Brasil: Um "
             "levantamento de práticas no cenário nacional. ",
-            html.B("Clique aqui para saber mais."),
+            html.Br(),
+            cta_pill("Clique aqui para saber mais"),
         ],
         href="/sobre",
         bg=CARD_YELLOW,
@@ -296,13 +323,14 @@ def page_home():
             "instituições levantadas o que permitiu que fosse feita uma análise "
             "estatística sobre o vínculo institucional ou a data de inauguração dos "
             "projetos. ",
-            html.B("Para explorar um pouco mais sobre essas informações clique aqui."),
+            html.Br(),
+            cta_pill("Para explorar mais, clique aqui"),
         ],
         href="/analise",
         bg=CARD_BLUE,
         color="#ffffff",
     )
-    return page_shell(PAGE1_BG, build_map(interactive=True), [yellow, blue])
+    return page_shell(PAGE1_BG, build_map(interactive=False), [yellow, blue])
 
 
 def page_analise():
@@ -325,7 +353,11 @@ def page_analise():
         CARD_PINK,
         grow=2,
     )
-    return page_shell(PAGE2_BG, build_map(interactive=True), [purple, pink, download_button()])
+    return page_shell(
+        PAGE2_BG,
+        build_map(interactive=False),
+        [home_button(), purple, pink, download_button()],
+    )
 
 
 def page_sobre():
@@ -356,7 +388,7 @@ def page_sobre():
         CARD_YELLOW,
         extra_style={"height": "100%", "overflowY": "auto"},
     )
-    return page_shell(PAGE3_BG, build_map(interactive=False), [big_card], width_ratio=(3, 2))
+    return page_shell(PAGE3_BG, build_map(interactive=False), [home_button(), big_card], width_ratio=(3, 2))
 
 
 # -----------------------------------------------------------------------------

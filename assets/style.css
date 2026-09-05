@@ -4,6 +4,17 @@ body {
     padding: 0;
 }
 
+/* Botões/links no mesmo idioma visual (pílula amarela) */
+.pill {
+    cursor: pointer;
+    transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+
+.pill:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
+}
+
 /* Fontes personalizadas — coloque os arquivos em assets/fonts/
    (aceita .woff2, .ttf ou .otf; o navegador usa o primeiro que existir) */
 @font-face {
