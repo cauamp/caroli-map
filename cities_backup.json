@@ -70,5 +70,29 @@
   "Periferia de Belo Horizonte (MG)": [
     -20,
     -44
+  ],
+  "Brasília DF": [
+    -15.8032581,
+    -47.8854767
+  ],
+  "Jardim São Luís, São Paulo (SP)": [
+    -23.6739274,
+    -46.7407377
+  ],
+  "São José da Tapera (AL)": [
+    -9.5584287,
+    -37.3818893
+  ],
+  "Manaus (AM)": [
+    -3.0739478,
+    -60.0893432
+  ],
+  "Jardim Paulista São Paulo (SP)": [
+    -23.6338245,
+    -47.0353245
+  ],
+  "Itu (SP)": [
+    -23.2510216,
+    -47.2686902
   ]
 }
