@@ -1,5 +1,7 @@
 import json
+import math
 import os
+from collections import defaultdict
 
 import dash
 import dash_leaflet as dl
@@ -46,6 +48,35 @@ df["organization_name"] = df["organization_name"].fillna("")
 df["description"] = df["description"].fillna("")
 df["img"] = df["img"].fillna("")
 
+# Distribui as organizações que compartilham a mesma coordenada (ex.: várias na
+# mesma cidade) num pequeno círculo, para os pins não ficarem exatamente um em
+# cima do outro. Determinístico e calculado uma única vez: cada organização
+# ocupa sempre o mesmo ponto em todas as páginas.
+RING_RADIUS = 0.04  # graus (~4,4 km); só se separa visualmente com zoom
+
+
+def _spread_overlapping(coords_series):
+    groups = defaultdict(list)
+    for idx, coord in coords_series.items():
+        if coord != (None, None):
+            groups[coord].append(idx)
+    result = coords_series.copy()
+    for coord, idxs in groups.items():
+        if len(idxs) < 2:
+            continue  # só uma organização nesta coordenada: mantém o centro
+        lat0, lon0 = coord
+        lon_corr = max(math.cos(math.radians(lat0)), 0.1)  # círculo visualmente redondo
+        for k, idx in enumerate(idxs):
+            ang = 2 * math.pi * k / len(idxs)
+            result.at[idx] = (
+                lat0 + RING_RADIUS * math.sin(ang),
+                lon0 + RING_RADIUS * math.cos(ang) / lon_corr,
+            )
+    return result
+
+
+df["marker_coords"] = _spread_overlapping(df["coords"])
+
 # Ícones dos marcadores (SVG). O ponto do pin fica na base central.
 PIN_ICON = {
     "iconUrl": "/assets/pin.svg",
@@ -68,7 +99,7 @@ PIN_CASA_ICON = {
 def build_markers(clickable=True):
     result = []
     for _, row in df.iterrows():
-        if row["coords"] == (None, None):
+        if row["marker_coords"] == (None, None):
             continue
         name = row["organization_name"] if row["organization_name"] else row["city"]
         children = []
@@ -92,7 +123,7 @@ def build_markers(clickable=True):
         icon = PIN_CASA_ICON if is_casa else PIN_ICON
         result.append(
             dl.Marker(
-                position=row["coords"],
+                position=row["marker_coords"],
                 icon=icon,
                 interactive=clickable,
                 # mantém a Casa da Infância sempre acima dos marcadores vizinhos
@@ -137,7 +168,7 @@ def build_map(interactive=True, legend=None):
     )
     the_map = dl.Map(
         center=[-15.0, -55.0],
-        zoom=4,
+        zoom=5,
         bounds=[[-35.0, -75.0], [5.0, -30.0]],  # limites do Brasil
         maxBounds=[[-35.0, -75.0], [5.0, -30.0]],
         maxBoundsViscosity=1.0,
@@ -407,33 +438,16 @@ def page_analise():
     )
     return page_shell(
         PAGE2_BG,
-        build_map(interactive=True, legend="📍 Clique em um marcador para saber mais!"),
+        build_map(interactive=True, legend="📍 Dê um zoom e clique em um marcador para saber mais!"),
         [home_button(), purple, pink, download_button()],
     )
 
 
 def page_sobre():
     paragraphs = [
-        "Este Mapa é fruto de um relatório de iniciação científica desenvolvida pela "
-        "estudante de graduação em Pedagogia pela Faculdade Federal de Minas Gerais, "
-        "Laura Caroli orientada pela professora Vanessa Neves, do grupo de pesquisa "
-        "Estudos em Cultura, Educação e Infância (ElaCei) para a pesquisa: Espaços de "
-        "Fomento de Desenvolvimento Infantil no Brasil: Um levantamento de práticas no "
-        "cenário nacional.",
-        "A pesquisa busca apresentar os resultados de uma pesquisa de mapeamento "
-        "qualitativo-exploratória dedicada a investigar e mapear espaços focados na "
-        "primeira infância e em fomentar diferentes processos para seu desenvolvimento, "
-        "tendo como referência central a proposta da Casa da Infância da UFMG e o tripé "
-        "acadêmico de ensino, pesquisa e extensão.",
-        "A metodologia estruturou-se em frentes de levantamentos, buscas manuais, "
-        "contatos institucionais com universidades e iniciativas, entrevistas "
-        "semiestruturadas com coordenadoras de dois espaços (LabEdu e CPAPI) e uma "
-        "visita presencial com notas em diário de campo (CRIAR Recife). Os dados "
-        "coletados de 34 organizações foram sistematizados em uma planilha, permitindo "
-        "plotar um mapa interativo e classificar e analisar 26 iniciativas. Os "
-        "resultados apontam um panorama nacional bem diverso, onde há projetos com "
-        "diferentes objetivos, e estes se concentram em frentes como a extensão social, "
-        "na formação continuada de adultos, laboratórios universitários, entre outros.",
+        "Este Mapa é fruto de um relatório de iniciação científica desenvolvida pela estudante de graduação em Pedagogia pela Faculdade Federal de Minas Gerais, Laura Caroli orientada pela professora Vanessa Neves, do grupo de pesquisa Estudos em Cultura, Educação e Infância (ElaCei) para a pesquisa: Espaços de Fomento de Desenvolvimento Infantil no Brasil: Um levantamento de práticas no cenário nacional. \n",
+        "Com carater qualitativo-exploratória, esta pesquisa de mapeamento se dedica a investigar e mapear espaços focados na primeira infância e em fomentar diferentes processos para seu desenvolvimento, tendo como referência central a proposta da Casa da Infância da UFMG e o tripé acadêmico de ensino, pesquisa e extensão. \n",
+        "A metodologia estruturou-se em frentes de levantamentos, buscas manuais, contatos institucionais com universidades e iniciativas, entrevistas semiestruturadas com coordenadoras de dois espaços (LabEdu e CPAPI) e uma visita presencial com notas em diário de campo (CRIAR Recife). Os dados coletados de 34 organizações foram sistematizados em uma planilha, permitindo plotar um mapa interativo e classificar e analisar 26 iniciativas. Os resultados apontam um panorama nacional bem diverso, onde há projetos com diferentes objetivos, e estes se concentram em frentes como a extensão social, na formação continuada de adultos, laboratórios universitários, entre outros.\n",
     ]
     big_card = card(
         [html.P(p, style={"margin": "0 0 14px 0"}) for p in paragraphs] + [download_button()],
