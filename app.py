@@ -1,9 +1,16 @@
-from geopy.geocoders import Nominatim
+import json
+import os
+
 import dash
 import dash_leaflet as dl
-from dash import html
-import json
 import pandas as pd
+from dash import Input, Output, dcc, html
+from dotenv import load_dotenv
+from geopy.geocoders import Nominatim
+
+load_dotenv()
+
+CARTO_TILE_KEY = os.environ["CARTO_TILE_KEY"]
 
 df = pd.read_csv("parsed_cities.csv")
 cities = df["city"].tolist()
@@ -75,55 +82,295 @@ markers = [
     if row["coords"] != (None, None)
 ]
 
-# App Dash
-app = dash.Dash(__name__, title="Bebês em Espaços Coletivos")
-app.index_string = app.index_string.replace("favicon.ico", "favicon.png")
+# -----------------------------------------------------------------------------
+# Cores e conteúdo (baseados no design.pdf)
+# -----------------------------------------------------------------------------
+HEADER_YELLOW = "#FBD44C"
+CARD_YELLOW = "#FBF0B0"
+CARD_BLUE = "#79B7D6"
+CARD_PURPLE = "#8A8FE0"
+CARD_PINK = "#F5A6A0"
+PAGE1_BG = "#F5A79E"  # coral
+PAGE2_BG = "#86DBA0"  # verde
+PAGE3_BG = "#A9D3EA"  # azul claro
 
-app.layout = html.Div(
-    style={
-        "backgroundColor": "#f3a9d1",  # light gray background
-        "minHeight": "100vh",  # full page height
-        "padding": "20px",  # margin inside
-        "fontFamily": "Arial, sans-serif",
-    },
-    children=[
-        html.H1(
-            "Bebês em Espaços Coletivos no Brasil",
-            style={
-                "textAlign": "center",
-                "color": "#ffffff",
-                "marginBottom": "20px",
-            },
+TITLE = "MAPA DE PRÁTICAS DE FOMENTO AO DESENVOLVIMENTO INFANTIL NO CENÁRIO NACIONAL"
+
+
+def build_map(interactive=True):
+    """Cria o mapa do Brasil. Quando interactive=False, todas as interações
+    (arrastar, zoom, controles) ficam travadas."""
+    locked = (
+        {}
+        if interactive
+        else {
+            "dragging": False,
+            "scrollWheelZoom": False,
+            "doubleClickZoom": False,
+            "boxZoom": False,
+            "keyboard": False,
+            "touchZoom": False,
+            "zoomControl": False,
+        }
+    )
+    return dl.Map(
+        center=[-15.0, -55.0],
+        zoom=4,
+        bounds=[[-35.0, -75.0], [5.0, -30.0]],  # limites do Brasil
+        maxBounds=[[-35.0, -75.0], [5.0, -30.0]],
+        maxBoundsViscosity=1.0,
+        style={"width": "100%", "height": "100%", "borderRadius": "12px"},
+        children=[
+            dl.TileLayer(
+                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key="
+                + CARTO_TILE_KEY,
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+            ),
+            dl.FeatureGroup(markers),
+        ],
+        **locked,
+    )
+
+
+def header():
+    return html.Div(
+        [
+            html.Span(TITLE, style={"letterSpacing": "1px"}),
+            html.Img(
+                src="/assets/icon.svg",
+                style={"height": "44px", "marginLeft": "18px", "flexShrink": "0"},
+            ),
+        ],
+        style={
+            "backgroundColor": HEADER_YELLOW,
+            "color": "#2b2b2b",
+            "fontWeight": "bold",
+            "fontSize": "18px",
+            "padding": "18px 24px",
+            "borderRadius": "16px",
+            "display": "flex",
+            "alignItems": "center",
+            "justifyContent": "space-between",
+        },
+    )
+
+
+def card(children, bg, color="#2b2b2b", grow=1, extra_style=None):
+    style = {
+        "backgroundColor": bg,
+        "color": color,
+        "padding": "22px",
+        "borderRadius": "18px",
+        "lineHeight": "1.5",
+        "fontStyle": "italic",
+        "boxSizing": "border-box",
+    }
+    if grow:
+        # cresce para ocupar a altura disponível; rola se o texto passar
+        style.update({"flex": str(grow), "minHeight": "0", "overflowY": "auto"})
+    if extra_style:
+        style.update(extra_style)
+    return html.Div(children, style=style)
+
+
+def clickable_card(children, href, bg, color="#2b2b2b", grow=1):
+    """Card inteiro clicável que navega para outra página."""
+    return dcc.Link(
+        card(
+            children,
+            bg,
+            color,
+            grow=0,
+            extra_style={"cursor": "pointer", "height": "100%", "overflowY": "auto"},
         ),
-        html.Div(
-            style={
-                "maxWidth": "1000px",  # center the content
-                "margin": "0 auto",  # center horizontally
-                "padding": "10px",
-                "backgroundColor": "#74c5cb",  # white background for the map container
-                "boxShadow": "0px 4px 12px rgba(0,0,0,0.1)",
-                "borderRadius": "10px",
-            },
-            children=[
-                dl.Map(
-                    center=[-15.0, -55.0],
-                    zoom=4,
-                    bounds=[[-35.0, -75.0], [5.0, -30.0]],  # limites do Brasil
-                    maxBounds=[[-35.0, -75.0], [5.0, -30.0]],
-                    maxBoundsViscosity=1.0,
-                    style={"width": "100%", "height": "600px", "borderRadius": "10px"},
-                    children=[
-                        dl.TileLayer(
-                            url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png",
-                            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
-                        ),
-                        dl.FeatureGroup(markers),
-                    ],
-                )
-            ],
-        ),
-    ],
+        href=href,
+        style={
+            "textDecoration": "none",
+            "color": "inherit",
+            "flex": str(grow),
+            "minHeight": "0",
+            "display": "flex",
+        },
+    )
+
+
+def download_button():
+    return html.A(
+        ["BAIXE O TRABALHO ESCRITO AQUI ⬇"],
+        href="#",
+        style={
+            "backgroundColor": HEADER_YELLOW,
+            "color": "#2b2b2b",
+            "fontWeight": "bold",
+            "padding": "16px 20px",
+            "borderRadius": "14px",
+            "textDecoration": "none",
+            "display": "block",
+            "textAlign": "center",
+        },
+    )
+
+
+def page_shell(bg, map_component, right_children):
+    return html.Div(
+        style={
+            "backgroundColor": bg,
+            "height": "100vh",
+            "padding": "20px",
+            "boxSizing": "border-box",
+            "fontFamily": "'Comic Sans MS', 'Segoe UI', sans-serif",
+            "display": "flex",
+            "gap": "20px",
+        },
+        children=[
+            # Coluna esquerda: cabeçalho (só a largura do mapa) + mapa
+            html.Div(
+                style={
+                    "flex": "4",
+                    "display": "flex",
+                    "flexDirection": "column",
+                    "gap": "20px",
+                    "minHeight": "0",
+                },
+                children=[
+                    header(),
+                    html.Div(
+                        map_component,
+                        style={
+                            "flex": "1",
+                            "minHeight": "0",
+                            "backgroundColor": "#ffffff",
+                            "padding": "22px",
+                            "borderRadius": "18px",
+                            "boxSizing": "border-box",
+                        },
+                    ),
+                ],
+            ),
+            # Coluna direita: cards preenchendo toda a altura
+            html.Div(
+                right_children,
+                style={
+                    "flex": "1.15",
+                    "display": "flex",
+                    "flexDirection": "column",
+                    "gap": "20px",
+                    "minHeight": "0",
+                },
+            ),
+        ],
+    )
+
+
+# -----------------------------------------------------------------------------
+# Páginas
+# -----------------------------------------------------------------------------
+def page_home():
+    yellow = clickable_card(
+        [
+            "Este Mapa é fruto de um trabalho de Iniciação Científica desenvolvido "
+            "pela estudante de graduação em Pedagogia pela Faculdade Federal de Minas "
+            "Gerais (UFMG), Laura Caroli orientada pela professora Vanessa Neves, do "
+            "grupo de pesquisa Estudos em Cultura, Educação e Infância (ElaCei) para a "
+            "pesquisa: Espaços de Fomento de Desenvolvimento Infantil no Brasil: Um "
+            "levantamento de práticas no cenário nacional. ",
+            html.B("Clique aqui para saber mais."),
+        ],
+        href="/sobre",
+        bg=CARD_YELLOW,
+    )
+    blue = clickable_card(
+        [
+            "Ao decorrer da pesquisa foi desenvolvida uma tabela com todas as "
+            "instituições levantadas o que permitiu que fosse feita uma análise "
+            "estatística sobre o vínculo institucional ou a data de inauguração dos "
+            "projetos. ",
+            html.B("Para explorar um pouco mais sobre essas informações clique aqui."),
+        ],
+        href="/analise",
+        bg=CARD_BLUE,
+        color="#ffffff",
+    )
+    return page_shell(PAGE1_BG, build_map(interactive=True), [yellow, blue])
+
+
+def page_analise():
+    purple = card(
+        "A partir das 34 iniciativas encontradas, a filtragem feita delimitou uma "
+        "Tabela Principal com 26 instituições apresentadas no site, entre outras 4 "
+        "Escolas de Aplicação e 5 Menções Honrosas de projetos itinerantes ou virtuais.",
+        CARD_PURPLE,
+        color="#ffffff",
+    )
+    pink = card(
+        "A análise quantitativa revelou que 19,2% das frentes pertencem a "
+        "universidades públicas, 7,7% a equipamentos municipais e 69,2% ao terceiro "
+        "setor (ONGs/OSCs). Os eixos de ação principais abrangem: 26,9% em "
+        "Desenvolvimento Comunitário, 15,4% em Linguagem Artística, 15,4% em Brincar e "
+        "Sensorialidade, 15,4% em Mediação de Leitura e 11,5% em Contato com a "
+        "Natureza. A matriz de cooecorrência aponta que 73,1% a atuação das iniciativas "
+        "ocorrem de forma híbrida, com forte cruzamento entre Pesquisa/Advocacy, "
+        "Formação de Educadores e do estímulo do Brincar.",
+        CARD_PINK,
+        grow=2,
+    )
+    return page_shell(PAGE2_BG, build_map(interactive=True), [purple, pink, download_button()])
+
+
+def page_sobre():
+    paragraphs = [
+        "Este Mapa é fruto de um relatório de iniciação científica desenvolvida pela "
+        "estudante de graduação em Pedagogia pela Faculdade Federal de Minas Gerais, "
+        "Laura Caroli orientada pela professora Vanessa Neves, do grupo de pesquisa "
+        "Estudos em Cultura, Educação e Infância (ElaCei) para a pesquisa: Espaços de "
+        "Fomento de Desenvolvimento Infantil no Brasil: Um levantamento de práticas no "
+        "cenário nacional.",
+        "A pesquisa busca apresentar os resultados de uma pesquisa de mapeamento "
+        "qualitativo-exploratória dedicada a investigar e mapear espaços focados na "
+        "primeira infância e em fomentar diferentes processos para seu desenvolvimento, "
+        "tendo como referência central a proposta da Casa da Infância da UFMG e o tripé "
+        "acadêmico de ensino, pesquisa e extensão.",
+        "A metodologia estruturou-se em frentes de levantamentos, buscas manuais, "
+        "contatos institucionais com universidades e iniciativas, entrevistas "
+        "semiestruturadas com coordenadoras de dois espaços (LabEdu e CPAPI) e uma "
+        "visita presencial com notas em diário de campo (CRIAR Recife). Os dados "
+        "coletados de 34 organizações foram sistematizados em uma planilha, permitindo "
+        "plotar um mapa interativo e classificar e analisar 26 iniciativas. Os "
+        "resultados apontam um panorama nacional bem diverso, onde há projetos com "
+        "diferentes objetivos, e estes se concentram em frentes como a extensão social, "
+        "na formação continuada de adultos, laboratórios universitários, entre outros.",
+    ]
+    big_card = card(
+        [html.P(p, style={"margin": "0 0 14px 0"}) for p in paragraphs] + [download_button()],
+        CARD_YELLOW,
+        extra_style={"height": "100%", "overflowY": "auto"},
+    )
+    return page_shell(PAGE3_BG, build_map(interactive=False), [big_card])
+
+
+# -----------------------------------------------------------------------------
+# App Dash + roteamento
+# -----------------------------------------------------------------------------
+app = dash.Dash(__name__, title="Bebês em Espaços Coletivos", suppress_callback_exceptions=True)
+# Favicon: .ico raster para o Safari (que rasteriza SVG sobre fundo branco)
+# e o SVG para navegadores modernos (Chrome/Brave/Firefox), que o preferem.
+app.index_string = app.index_string.replace(
+    "{%favicon%}",
+    '<link rel="icon" href="/assets/logo_square.ico?v=2" sizes="32x32">'
+    '<link rel="icon" type="image/svg+xml" href="/assets/logo_circle.svg?v=2">',
 )
+
+app.layout = html.Div([dcc.Location(id="url"), html.Div(id="page-content")])
+
+
+@app.callback(Output("page-content", "children"), Input("url", "pathname"))
+def render_page(pathname):
+    if pathname == "/analise":
+        return page_analise()
+    if pathname == "/sobre":
+        return page_sobre()
+    return page_home()
+
 
 server = app.server  # 👈 important for Render / Gunicorn
 

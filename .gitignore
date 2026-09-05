@@ -1,0 +1,6 @@
+old/
+.DS_store
+design.pdf
+.env
+__pycache__/
+*.pyc
