@@ -46,12 +46,20 @@ df["organization_name"] = df["organization_name"].fillna("")
 df["description"] = df["description"].fillna("")
 df["img"] = df["img"].fillna("")
 
-# Ícone customizado
-custom_icon = {
-    "iconUrl": "https://cdn-icons-png.flaticon.com/512/854/854878.png",
-    "iconSize": [30, 30],
-    "iconAnchor": [15, 30],
-    "popupAnchor": [0, -30],
+# Ícones dos marcadores (SVG). O ponto do pin fica na base central.
+PIN_ICON = {
+    "iconUrl": "/assets/pin.svg",
+    "iconSize": [25, 35],
+    "iconAnchor": [15, 42],
+    "popupAnchor": [0, -42],
+}
+# A "Casa da Infância – UFMG" usa um pin próprio, um pouco maior para destaque.
+CASA_INFANCIA_ID = "Casa da Infância – UFMG"
+PIN_CASA_ICON = {
+    "iconUrl": "/assets/pin_casaDaInfancia.svg",
+    "iconSize": [31, 44],
+    "iconAnchor": [19, 53],
+    "popupAnchor": [0, -53],
 }
 
 
@@ -80,12 +88,17 @@ def build_markers(clickable=True):
                     ]
                 ),
             ]
+        is_casa = row["organization_name"] == CASA_INFANCIA_ID
+        icon = PIN_CASA_ICON if is_casa else PIN_ICON
         result.append(
             dl.Marker(
                 position=row["coords"],
-                icon=custom_icon,
+                icon=icon,
                 interactive=clickable,
+                # mantém a Casa da Infância sempre acima dos marcadores vizinhos
+                zIndexOffset=1000 if is_casa else 0,
                 children=children,
+                # iconSize="30",
             )
         )
     return result
@@ -132,7 +145,7 @@ def build_map(interactive=True, legend=None):
         style={"width": "100%", "height": "100%", "borderRadius": "12px"},
         children=[
             dl.TileLayer(
-                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=" + CARTO_TILE_KEY,
+                url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png?key=" + CARTO_TILE_KEY,
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
             ),
             dl.FeatureGroup(build_markers(clickable=interactive)),
@@ -178,7 +191,7 @@ def header():
         style={
             "backgroundColor": HEADER_YELLOW,
             "color": "#2b2b2b",
-            "fontFamily": "'Dreaming Outloud Sans', 'Comic Sans MS', cursive",
+            "fontFamily": "'Pangolin', 'Comic Sans MS', cursive",
             "fontWeight": "bold",
             "fontSize": "18px",
             "padding": "18px 24px",
@@ -235,7 +248,7 @@ def clickable_card(children, href, bg, color="#2b2b2b", grow=1):
 PILL_STYLE = {
     "backgroundColor": HEADER_YELLOW,
     "color": "#2b2b2b",
-    "fontFamily": "'Dreaming Outloud Sans', 'Comic Sans MS', cursive",
+    "fontFamily": "'Pangolin', 'Comic Sans MS', cursive",
     "fontWeight": "bold",
     "padding": "14px 20px",
     "borderRadius": "14px",
@@ -390,7 +403,7 @@ def page_analise():
     )
     return page_shell(
         PAGE2_BG,
-        build_map(interactive=True, legend="↖ Clique em um marcador para saber mais!"),
+        build_map(interactive=True, legend="📍 Clique em um marcador para saber mais!"),
         [home_button(), purple, pink, download_button()],
     )
 
@@ -429,7 +442,12 @@ def page_sobre():
 # -----------------------------------------------------------------------------
 # App Dash + roteamento
 # -----------------------------------------------------------------------------
-app = dash.Dash(__name__, title="Bebês em Espaços Coletivos", suppress_callback_exceptions=True)
+app = dash.Dash(
+    __name__,
+    title="Bebês em Espaços Coletivos",
+    suppress_callback_exceptions=True,
+    external_stylesheets=["https://fonts.googleapis.com/css2?family=Pangolin&display=swap"],
+)
 # Favicon: .ico raster para o Safari (que rasteriza SVG sobre fundo branco)
 # e o SVG para navegadores modernos (Chrome/Brave/Firefox), que o preferem.
 app.index_string = app.index_string.replace(
