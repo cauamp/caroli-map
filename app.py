@@ -98,7 +98,6 @@ def build_markers(clickable=True):
                 # mantém a Casa da Infância sempre acima dos marcadores vizinhos
                 zIndexOffset=1000 if is_casa else 0,
                 children=children,
-                # iconSize="30",
             )
         )
     return result
@@ -188,6 +187,7 @@ def header():
                 style={"height": "88px", "marginLeft": "18px", "flexShrink": "0"},
             ),
         ],
+        className="app-header",
         style={
             "backgroundColor": HEADER_YELLOW,
             "color": "#2b2b2b",
@@ -298,6 +298,7 @@ def page_shell(
     ),
 ):
     return html.Div(
+        className="shell",
         style={
             "backgroundColor": bg,
             "height": "100vh",
@@ -310,6 +311,7 @@ def page_shell(
         children=[
             # Coluna esquerda: cabeçalho (só a largura do mapa) + mapa
             html.Div(
+                className="col-left",
                 style={
                     "flex": str(width_ratio[0]),
                     "display": "flex",
@@ -321,6 +323,7 @@ def page_shell(
                     header(),
                     html.Div(
                         map_component,
+                        className="map-frame",
                         style={
                             "flex": "1",
                             "minHeight": "0",
@@ -335,6 +338,7 @@ def page_shell(
             # Coluna direita: cards preenchendo toda a altura
             html.Div(
                 right_children,
+                className="col-right",
                 style={
                     "flex": str(width_ratio[1]),
                     "display": "flex",
@@ -447,6 +451,7 @@ app = dash.Dash(
     title="Bebês em Espaços Coletivos",
     suppress_callback_exceptions=True,
     external_stylesheets=["https://fonts.googleapis.com/css2?family=Pangolin&display=swap"],
+    meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
 )
 # Favicon: .ico raster para o Safari (que rasteriza SVG sobre fundo branco)
 # e o SVG para navegadores modernos (Chrome/Brave/Firefox), que o preferem.

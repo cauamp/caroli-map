@@ -15,11 +15,49 @@ body {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
 }
 
-/* A fonte do título/botões (Gochi Hand) é carregada via Google Fonts em app.py */
+/* A fonte do título/botões (Pangolin) é carregada via Google Fonts em app.py */
 @font-face {
     font-family: "Providence Sans";
     src: url("/assets/fonts/ProvidenceSans-Regular.ttf") format("truetype");
     font-weight: normal;
     font-style: normal;
     font-display: swap;
+}
+
+/* ---------------------------------------------------------------------------
+   Responsivo: em telas de smartphone as colunas empilham (mapa em cima,
+   cards embaixo) e a página passa a rolar verticalmente.
+   Usamos !important porque os estilos base são inline (têm prioridade).
+   --------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+    .shell {
+        flex-direction: column !important;
+        height: auto !important;
+        min-height: 100vh;
+        padding: 12px !important;
+        gap: 14px !important;
+    }
+
+    .col-left,
+    .col-right {
+        flex: none !important;
+        width: 100%;
+    }
+
+    /* altura explícita para o Leaflet conseguir renderizar o mapa */
+    .map-frame {
+        flex: none !important;
+        height: 58vh !important;
+        padding: 10px !important;
+    }
+
+    .app-header {
+        font-size: 14px !important;
+        padding: 12px 16px !important;
+        border-radius: 12px !important;
+    }
+
+    .app-header img {
+        height: 48px !important;
+    }
 }
