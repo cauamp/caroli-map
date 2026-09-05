@@ -430,7 +430,7 @@ def page_analise():
         "setor (ONGs/OSCs). Os eixos de ação principais abrangem: 26,9% em "
         "Desenvolvimento Comunitário, 15,4% em Linguagem Artística, 15,4% em Brincar e "
         "Sensorialidade, 15,4% em Mediação de Leitura e 11,5% em Contato com a "
-        "Natureza. A matriz de cooecorrência aponta que 73,1% a atuação das iniciativas "
+        "Natureza. A matriz de coocorrência aponta que 73,1% a atuação das iniciativas "
         "ocorrem de forma híbrida, com forte cruzamento entre Pesquisa/Advocacy, "
         "Formação de Educadores e do estímulo do Brincar.",
         CARD_PINK,
@@ -445,8 +445,8 @@ def page_analise():
 
 def page_sobre():
     paragraphs = [
-        "Este Mapa é fruto de um relatório de iniciação científica desenvolvida pela estudante de graduação em Pedagogia pela Faculdade Federal de Minas Gerais, Laura Caroli orientada pela professora Vanessa Neves, do grupo de pesquisa Estudos em Cultura, Educação e Infância (ElaCei) para a pesquisa: Espaços de Fomento de Desenvolvimento Infantil no Brasil: Um levantamento de práticas no cenário nacional. \n",
-        "Com carater qualitativo-exploratória, esta pesquisa de mapeamento se dedica a investigar e mapear espaços focados na primeira infância e em fomentar diferentes processos para seu desenvolvimento, tendo como referência central a proposta da Casa da Infância da UFMG e o tripé acadêmico de ensino, pesquisa e extensão. \n",
+        "Este Mapa é fruto de um relatório de iniciação científica desenvolvida pela estudante de graduação em Pedagogia pela Universidade Federal de Minas Gerais (UFMG), Laura Caroli orientada pela professora Vanessa Neves, do grupo de pesquisa Estudos em Cultura, Educação e Infância (ElaCei) para a pesquisa: Espaços de Fomento de Desenvolvimento Infantil no Brasil: Um levantamento de práticas no cenário nacional. \n",
+        "Com carater qualitativo-exploratório, esta pesquisa de mapeamento se dedica a investigar e mapear espaços focados na primeira infância e em fomentar diferentes processos para seu desenvolvimento, tendo como referência central a proposta da Casa da Infância da UFMG e o tripé acadêmico de ensino, pesquisa e extensão. \n",
         "A metodologia estruturou-se em frentes de levantamentos, buscas manuais, contatos institucionais com universidades e iniciativas, entrevistas semiestruturadas com coordenadoras de dois espaços (LabEdu e CPAPI) e uma visita presencial com notas em diário de campo (CRIAR Recife). Os dados coletados de 34 organizações foram sistematizados em uma planilha, permitindo plotar um mapa interativo e classificar e analisar 26 iniciativas. Os resultados apontam um panorama nacional bem diverso, onde há projetos com diferentes objetivos, e estes se concentram em frentes como a extensão social, na formação continuada de adultos, laboratórios universitários, entre outros.\n",
     ]
     big_card = card(
@@ -462,7 +462,7 @@ def page_sobre():
 # -----------------------------------------------------------------------------
 app = dash.Dash(
     __name__,
-    title="Bebês em Espaços Coletivos",
+    title="MAPA DE PRÁTICAS DE FOMENTO AO DESENVOLVIMENTO INFANTIL NO CENÁRIO NACIONAL",
     suppress_callback_exceptions=True,
     external_stylesheets=["https://fonts.googleapis.com/css2?family=Pangolin&display=swap"],
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
