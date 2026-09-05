@@ -54,33 +54,42 @@ custom_icon = {
     "popupAnchor": [0, -30],
 }
 
-# Cria marcadores
-markers = [
-    dl.Marker(
-        position=row["coords"],
-        icon=custom_icon,
-        children=[
-            dl.Tooltip(row["organization_name"] if row["organization_name"] else row["city"]),
-            dl.Popup(
-                [
-                    html.H3(
-                        row["organization_name"] if row["organization_name"] else row["city"],
-                        style={"textAlign": "center", "margin": "5px 0"},
-                    ),
-                    html.P(row["description"], style={"textAlign": "justify"}),
-                    html.Img(
-                        src=row["img"],
-                        style={"width": "250px", "height": "auto", "display": "block", "margin": "0 auto"},
-                    )
-                    if row["img"]
-                    else None,
-                ]
-            ),
-        ],
-    )
-    for _, row in df.iterrows()
-    if row["coords"] != (None, None)
-]
+
+# Cria marcadores. Quando clickable=False, os marcadores não respondem a
+# cliques/hover (sem popup nem tooltip) — mapa apenas ilustrativo.
+def build_markers(clickable=True):
+    result = []
+    for _, row in df.iterrows():
+        if row["coords"] == (None, None):
+            continue
+        name = row["organization_name"] if row["organization_name"] else row["city"]
+        children = []
+        if clickable:
+            children = [
+                dl.Tooltip(name),
+                dl.Popup(
+                    [
+                        html.H3(name, style={"textAlign": "center", "margin": "5px 0"}),
+                        html.P(row["description"], style={"textAlign": "justify"}),
+                        html.Img(
+                            src=row["img"],
+                            style={"width": "250px", "height": "auto", "display": "block", "margin": "0 auto"},
+                        )
+                        if row["img"]
+                        else None,
+                    ]
+                ),
+            ]
+        result.append(
+            dl.Marker(
+                position=row["coords"],
+                icon=custom_icon,
+                interactive=clickable,
+                children=children,
+            )
+        )
+    return result
+
 
 # -----------------------------------------------------------------------------
 # Cores e conteúdo (baseados no design.pdf)
@@ -97,9 +106,10 @@ PAGE3_BG = "#A9D3EA"  # azul claro
 TITLE = "MAPA DE PRÁTICAS DE FOMENTO AO DESENVOLVIMENTO INFANTIL NO CENÁRIO NACIONAL"
 
 
-def build_map(interactive=True):
-    """Cria o mapa do Brasil. Quando interactive=False, todas as interações
-    (arrastar, zoom, controles) ficam travadas."""
+def build_map(interactive=True, legend=None):
+    """Cria o mapa do Brasil. Quando interactive=False, as interações
+    (arrastar, zoom, controles) e os cliques nos marcadores ficam travados.
+    Se `legend` for informado, sobrepõe um aviso no canto do mapa."""
     locked = (
         {}
         if interactive
@@ -113,7 +123,7 @@ def build_map(interactive=True):
             "zoomControl": False,
         }
     )
-    return dl.Map(
+    the_map = dl.Map(
         center=[-15.0, -55.0],
         zoom=4,
         bounds=[[-35.0, -75.0], [5.0, -30.0]],  # limites do Brasil
@@ -125,9 +135,34 @@ def build_map(interactive=True):
                 url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=" + CARTO_TILE_KEY,
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
             ),
-            dl.FeatureGroup(markers),
+            dl.FeatureGroup(build_markers(clickable=interactive)),
         ],
         **locked,
+    )
+    if not legend:
+        return the_map
+    return html.Div(
+        [
+            the_map,
+            html.Div(
+                legend,
+                style={
+                    "position": "absolute",
+                    "bottom": "14px",
+                    "left": "14px",
+                    "zIndex": "1000",
+                    "backgroundColor": "rgba(255,255,255,0.92)",
+                    "color": "#2b2b2b",
+                    "fontFamily": "'Providence Sans', 'Segoe UI', sans-serif",
+                    "fontSize": "14px",
+                    "fontStyle": "italic",
+                    "padding": "8px 14px",
+                    "borderRadius": "12px",
+                    "boxShadow": "0 2px 6px rgba(0,0,0,0.18)",
+                },
+            ),
+        ],
+        style={"position": "relative", "height": "100%", "width": "100%"},
     )
 
 
@@ -355,7 +390,7 @@ def page_analise():
     )
     return page_shell(
         PAGE2_BG,
-        build_map(interactive=False),
+        build_map(interactive=True, legend="↖ Clique em um marcador para saber mais!"),
         [home_button(), purple, pink, download_button()],
     )
 
