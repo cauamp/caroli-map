@@ -18,17 +18,27 @@ df = pd.read_csv("parsed_cities.csv")
 cities = df["city"].tolist()
 
 # Tenta carregar backup primeiro
+coords = None
 try:
     with open("./cities_backup.json", "r", encoding="utf-8") as backup_file:
         coords = json.load(backup_file)
     print("📁 Carregado coordenadas do backup")
+    # Verifica se todas as cidades estão no backup
+    for city in cities:
+        if city not in coords:
+            print(f"Cidade {city} não encontrada no backup. Re-geocodificando...")
+            raise FileNotFoundError
+
 except FileNotFoundError:
     # Inicializa geocodificador
     geolocator = Nominatim(user_agent="city_mapper")
 
     # Busca coordenadas
-    coords = {}
+    if coords is None:
+        coords = {}
     for city in cities:
+        if city in coords:
+            continue  # já geocodificado
         location = geolocator.geocode(f"{city}, Brazil")
         if location:
             coords[city] = (location.latitude, location.longitude)
