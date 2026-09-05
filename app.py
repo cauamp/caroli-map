@@ -137,7 +137,7 @@ def header():
             html.Span(TITLE, style={"letterSpacing": "1px"}),
             html.Img(
                 src="/assets/icon.svg",
-                style={"height": "44px", "marginLeft": "18px", "flexShrink": "0"},
+                style={"height": "88px", "marginLeft": "18px", "flexShrink": "0"},
             ),
         ],
         style={
@@ -220,7 +220,7 @@ def page_shell(
     right_children,
     width_ratio=(
         5,
-        1,
+        2,
     ),
 ):
     return html.Div(
