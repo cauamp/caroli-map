@@ -122,8 +122,7 @@ def build_map(interactive=True):
         style={"width": "100%", "height": "100%", "borderRadius": "12px"},
         children=[
             dl.TileLayer(
-                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key="
-                + CARTO_TILE_KEY,
+                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png?key=" + CARTO_TILE_KEY,
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
             ),
             dl.FeatureGroup(markers),
@@ -144,8 +143,9 @@ def header():
         style={
             "backgroundColor": HEADER_YELLOW,
             "color": "#2b2b2b",
+            "fontFamily": "'Dreaming Outloud Sans', 'Comic Sans MS', cursive",
             "fontWeight": "bold",
-            "fontSize": "18px",
+            "fontSize": "22px",
             "padding": "18px 24px",
             "borderRadius": "16px",
             "display": "flex",
@@ -159,11 +159,13 @@ def card(children, bg, color="#2b2b2b", grow=1, extra_style=None):
     style = {
         "backgroundColor": bg,
         "color": color,
+        "fontFamily": "'Providence Sans', 'Segoe UI', sans-serif",
         "padding": "22px",
         "borderRadius": "18px",
         "lineHeight": "1.5",
         "fontStyle": "italic",
         "boxSizing": "border-box",
+        "fontSize": "18px",
     }
     if grow:
         # cresce para ocupar a altura disponível; rola se o texto passar
@@ -201,6 +203,7 @@ def download_button():
         style={
             "backgroundColor": HEADER_YELLOW,
             "color": "#2b2b2b",
+            "fontFamily": "'Dreaming Outloud Sans', 'Comic Sans MS', cursive",
             "fontWeight": "bold",
             "padding": "16px 20px",
             "borderRadius": "14px",
@@ -211,7 +214,15 @@ def download_button():
     )
 
 
-def page_shell(bg, map_component, right_children):
+def page_shell(
+    bg,
+    map_component,
+    right_children,
+    width_ratio=(
+        5,
+        1,
+    ),
+):
     return html.Div(
         style={
             "backgroundColor": bg,
@@ -226,7 +237,7 @@ def page_shell(bg, map_component, right_children):
             # Coluna esquerda: cabeçalho (só a largura do mapa) + mapa
             html.Div(
                 style={
-                    "flex": "4",
+                    "flex": str(width_ratio[0]),
                     "display": "flex",
                     "flexDirection": "column",
                     "gap": "20px",
@@ -251,7 +262,7 @@ def page_shell(bg, map_component, right_children):
             html.Div(
                 right_children,
                 style={
-                    "flex": "1.15",
+                    "flex": str(width_ratio[1]),
                     "display": "flex",
                     "flexDirection": "column",
                     "gap": "20px",
@@ -345,7 +356,7 @@ def page_sobre():
         CARD_YELLOW,
         extra_style={"height": "100%", "overflowY": "auto"},
     )
-    return page_shell(PAGE3_BG, build_map(interactive=False), [big_card])
+    return page_shell(PAGE3_BG, build_map(interactive=False), [big_card], width_ratio=(3, 2))
 
 
 # -----------------------------------------------------------------------------

@@ -3,3 +3,23 @@ body {
     margin: 0;
     padding: 0;
 }
+
+/* Fontes personalizadas — coloque os arquivos em assets/fonts/
+   (aceita .woff2, .ttf ou .otf; o navegador usa o primeiro que existir) */
+@font-face {
+    font-family: "Dreaming Outloud Sans";
+    src: url("/assets/fonts/DreamingOutloudSans-Regular.woff2") format("woff2"),
+         url("/assets/fonts/DreamingOutloudSans-Regular.ttf") format("truetype"),
+         url("/assets/fonts/DreamingOutloudSans-Regular.otf") format("opentype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "Providence Sans";
+    src: url("/assets/fonts/ProvidenceSans-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+    font-display: swap;
+}
