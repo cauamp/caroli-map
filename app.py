@@ -462,7 +462,7 @@ def page_sobre():
 # -----------------------------------------------------------------------------
 app = dash.Dash(
     __name__,
-    title="MAPA DE PRÁTICAS DE FOMENTO AO DESENVOLVIMENTO INFANTIL NO CENÁRIO NACIONAL",
+    title="Mapa de Práticas de Fomento ao Desenvolvimento Infantil no Brasil",
     suppress_callback_exceptions=True,
     external_stylesheets=["https://fonts.googleapis.com/css2?family=Pangolin&display=swap"],
     meta_tags=[{"name": "viewport", "content": "width=device-width, initial-scale=1"}],
