@@ -24,6 +24,16 @@ body {
     font-display: swap;
 }
 
+@font-face {
+    font-family: "Providence Sans Bold";
+    src: url("/assets/fonts/ProvidenceSans-Bold.otf") format("opentype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+
+
 /* ---------------------------------------------------------------------------
    Responsivo: em telas de smartphone as colunas empilham (mapa em cima,
    cards embaixo) e a página passa a rolar verticalmente.

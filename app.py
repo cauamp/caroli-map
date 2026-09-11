@@ -206,7 +206,7 @@ def build_map(interactive=True, legend=None):
                     "zIndex": "1000",
                     "backgroundColor": "rgba(255,255,255,0.92)",
                     "color": "#2b2b2b",
-                    "fontFamily": "'Providence Sans', 'Segoe UI', sans-serif",
+                    "fontFamily": "'Providence Sans Bold', 'Segoe UI', sans-serif",
                     "fontSize": "14px",
                     "fontStyle": "italic",
                     "padding": "8px 14px",
@@ -248,7 +248,7 @@ def card(children, bg, color="#2b2b2b", grow=1, extra_style=None):
     style = {
         "backgroundColor": bg,
         "color": color,
-        "fontFamily": "'Providence Sans', 'Segoe UI', sans-serif",
+        "fontFamily": "'Providence Sans Bold', 'Segoe UI', sans-serif",
         "padding": "12px",
         "borderRadius": "18px",
         "lineHeight": "1.5",
