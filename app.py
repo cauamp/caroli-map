@@ -303,7 +303,9 @@ PILL_STYLE = {
 def download_button():
     return html.A(
         ["BAIXE O TRABALHO ESCRITO AQUI ⬇"],
-        href="#",
+        href="/assets/espacos_de_fomento_ao_desenvolvimento_infantil_no_brasil_um_levantamento_de_praticas_no_cenario_nacional-LauraCaroli.pdf",
+        download=True,
+        target="_blank",
         className="pill",
         style={**PILL_STYLE, "display": "block"},
     )
